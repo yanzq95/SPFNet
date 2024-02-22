@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-[<a href="http://arxiv.org/abs/2402.13876"><strong>Paper</strong></a>]
+[<a href="http://arxiv.org/abs/2402.13876.pdf"><strong>Paper</strong></a>]
 [<a href="https://yanzq95.github.io/projectpage/SPFNet/index.html"><strong>Project Page</strong></a>]
 </p>
 
