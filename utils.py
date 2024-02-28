@@ -11,21 +11,8 @@ def calc_rmse(a, b, minmax):
     b = b * 100
     
     return torch.sqrt(torch.mean(torch.pow(a-b,2)))
-
-
+    
 def rgbdd_calc_rmse(gt, out, minmax):
-    # minmax = torch.from_numpy(minmax).cuda()
-    gt = gt[6:-6, 6:-6]
-    out = out[6:-6, 6:-6]
-
-    # gt = gt*(minmax[0]-minmax[1]) + minmax[1]
-    out = out*(minmax[0]-minmax[1]) + minmax[1]
-    gt = gt / 10.0
-    out = out / 10.0
-    
-    return torch.sqrt(torch.mean(torch.pow(gt-out,2)))
-    
-def rgbdd_calc_rmse_sync(gt, out, minmax):
     # minmax = torch.from_numpy(minmax).cuda()
     gt = gt[6:-6, 6:-6]
     out = out[6:-6, 6:-6]
