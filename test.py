@@ -99,7 +99,7 @@ with torch.no_grad():
             guidance, lr, gt, seg, ns,maxx,minn = data['guidance'].to(device), data['lr'].to(device), data['gt'].to(device), data[
                 'seg'].to(device), data['ns'].to(device),data['max'].to(device),data['min'].to(device).to(device)
             out = net((guidance, lr, seg,ns))
-            rmse[idx] = rgbdd_calc_rmse_sync(gt[0,0], out[0,0],[maxx,minn])
+            rmse[idx] = rgbdd_calc_rmse(gt[0,0], out[0,0],[maxx,minn])
             
             path_output = '{}/output'.format(opt.results_dir)
             os.makedirs(path_output, exist_ok=True)
