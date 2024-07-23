@@ -127,10 +127,9 @@ class RGBDD_Dataset(Dataset):
             gt = np.array(gt).astype(np.float32)
 
         # normalization
-        max_out = np.max(gt)
-        min_out = np.min(gt)
-        gt = (gt - min_out) / (max_out - min_out)
-        lr = (lr - min_out) / (max_out - min_out)
+        max_out = np.max(lr)
+        min_out = np.min(lr)
+
         
         image_max = np.max(image)
         image_min = np.min(image)
@@ -145,8 +144,13 @@ class RGBDD_Dataset(Dataset):
         ns = (ns - ns_min) / (ns_max - ns_min)
 
         if self.train:
-            image, lr, gt, seg, ns = get_patch(image, lr, gt, seg, ns, scale=self.scale, patch_size=288)
-
+            max_gt = np.max(gt)
+            min_gt = np.min(gt)
+            gt = (gt - min_gt) / (max_gt - min_gt)
+            lr = (lr - min_gt) / (max_gt - min_gt)
+            image, lr, gt, seg, ns = get_patch(image, lr, gt, seg, ns, scale=self.scale, patch_size=256)
+        else:
+            lr = (lr - min_out) / (max_out - min_out)
         if self.transform:
             image = self.transform(image).float()
             seg = self.transform(np.expand_dims(seg, 2)).float()
