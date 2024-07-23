@@ -42,7 +42,7 @@ class NYU_v2_datset(Dataset):
         ns = self.norms[idx]
         if self.train:
             image, depth,seg, ns = get_patch(img=image, gt=np.expand_dims(depth, 2), seg=np.expand_dims(seg, 2), ns=ns,
-                                          patch_size=288)
+                                          patch_size=256)
             image, depth,seg, ns = arugment(img=image, gt=depth, seg=seg, ns=ns)
         h, w = depth.shape[:2]
         s = self.scale
