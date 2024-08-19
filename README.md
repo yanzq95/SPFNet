@@ -5,9 +5,9 @@
 <a href="https://yanzq95.github.io/">Zhiqiang Yan</a><sup>1&dagger;&Dagger;	</sup>, 
 <a href="https://faculty.ucmerced.edu/mhyang/">Ming-Hsuan Yang</a><sup>2</sup>, 
 <a href="https://jspan.github.io/">Jinshan Pan</a><sup>1</sup>,
-<a href="https://scholar.google.com/citations?user=6CIDtZQAAAAJ&hl=zh-CN">Jian Yang</a><sup>1&Dagger;</sup>,
 <a href="https://tyshiwo.github.io/">Ying Tai</a><sup>3</sup>,
-<a href="https://guangweigao.github.io/">Guangwei Gao</a><sup>4</sup>
+<a href="https://guangweigao.github.io/">Guangwei Gao</a><sup>4</sup>,
+  <a href="https://scholar.google.com/citations?user=6CIDtZQAAAAJ&hl=zh-CN">Jian Yang</a><sup>1&Dagger;</sup>
 </p>
 
 <p align="center">
