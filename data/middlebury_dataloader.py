@@ -67,8 +67,8 @@ class Middlebury_dataset(Dataset):
         h, w = gt.shape[0], gt.shape[1]
         s = self.scale
         
-        gt_max = np.max(gt)
-        gt_min = np.min(gt)
+        gt_max = 255.0
+        gt_min = 0.0
         gt = (gt - gt_min) / (gt_max - gt_min)
 
         lr = np.array(Image.fromarray(gt).resize((w//s,h//s),Image.BICUBIC)).astype(np.float32)
