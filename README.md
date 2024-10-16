@@ -1,22 +1,22 @@
 <p align="center">
 <h2 align="center"> Scene Prior Filtering for Depth Map Super-Resolution </h2>
 
-<p align="center"><a href="https://scholar.google.com/citations?user=VogTuQkAAAAJ&hl=zh-CN">Zhengxue Wang</a><sup>1&dagger;</sup>, 
-<a href="https://yanzq95.github.io/">Zhiqiang Yan</a><sup>1&dagger;&Dagger;	</sup>, 
+<p align="center"><a href="https://scholar.google.com/citations?user=VogTuQkAAAAJ&hl=zh-CN">Zhengxue Wang</a><sup>1</sup>, 
+<a href="https://yanzq95.github.io/">Zhiqiang Yan</a><sup>1</sup>, 
 <a href="https://faculty.ucmerced.edu/mhyang/">Ming-Hsuan Yang</a><sup>2</sup>, 
 <a href="https://jspan.github.io/">Jinshan Pan</a><sup>1</sup>,
-<a href="https://tyshiwo.github.io/">Ying Tai</a><sup>3</sup>,
-<a href="https://guangweigao.github.io/">Guangwei Gao</a><sup>4</sup>,
-  <a href="https://scholar.google.com/citations?user=6CIDtZQAAAAJ&hl=zh-CN">Jian Yang</a><sup>1&Dagger;</sup>
+<a href="https://guangweigao.github.io/">Guangwei Gao</a><sup>3</sup>,
+<a href="https://tyshiwo.github.io/">Ying Tai</a><sup>4</sup>,
+  <a href="https://scholar.google.com/citations?user=6CIDtZQAAAAJ&hl=zh-CN">Jian Yang</a><sup>1</sup>  <!--&Dagger;-->
 </p>
 
 <p align="center">
-  <sup>&dagger;</sup>equal contribution&nbsp;&nbsp;&nbsp;
-  <sup>&Dagger;</sup>corresponding author&nbsp;&nbsp;&nbsp;<br>
-          <sup>1</sup>Nanjing University of Science and Technology&nbsp;&nbsp;&nbsp;
+  <!--<sup>&dagger;</sup>equal contribution&nbsp;&nbsp;&nbsp;-->
+   <!--<sup>&Dagger;</sup>corresponding author&nbsp;&nbsp;&nbsp;<br>-->
+  <sup>1</sup>Nanjing University of Science and Technology&nbsp;&nbsp;&nbsp;
   <sup>2</sup>University of California at Merced&nbsp;&nbsp;&nbsp;<br>
-  <sup>3</sup>Nanjing University&nbsp;&nbsp;&nbsp;
-  <sup>4</sup>Nanjing University of Posts and Telecommunications&nbsp;&nbsp;&nbsp;
+  <sup>3</sup>Nanjing University of Posts and Telecommunications&nbsp;&nbsp;&nbsp;
+  <sup>4</sup>Nanjing University&nbsp;&nbsp;&nbsp;
 </p>
 
 <p align="center">
