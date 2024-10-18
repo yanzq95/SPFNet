@@ -4,8 +4,8 @@ from model.common import *
 
 from data.nyu_dataloader import *
 from data.rgbdd_dataloader import *
-from data.middlebury_dataloader import Middlebury_dataset
-from utils import calc_rmse, rgbdd_calc_rmse, midd_calc_rmse
+from data.tofdsr_dataloader import *
+from utils import calc_rmse, rgbdd_calc_rmse, tofdsr_calc_rmse
 
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
@@ -23,11 +23,11 @@ parser.add_argument('--scale', type=int, default=4, help='scale factor')
 parser.add_argument('--lr',  default='0.0001', type=float, help='learning rate')
 parser.add_argument('--result',  default='experiment', help='learning rate')
 parser.add_argument('--epoch',  default=200, type=int, help='max epoch')
-parser.add_argument('--device',  default="1", type=str, help='which gpu use')
+parser.add_argument('--device',  default="0", type=str, help='which gpu use')
 parser.add_argument("--decay_iterations", type=list, default=[5e4, 1e5, 2e5], help="steps to start lr decay")
 parser.add_argument("--num_feats", type=int, default=42, help="channel number of the middle hidden layer")
 parser.add_argument("--gamma", type=float, default=0.2, help="decay rate of learning rate")
-parser.add_argument("--root_dir", type=str, default='/opt/data/private/dataset/NYU-v2', help="root dir of dataset")
+parser.add_argument("--root_dir", type=str, default='./dataset/NYU-v2', help="root dir of dataset")
 parser.add_argument("--batchsize", type=int, default=1, help="batchsize of training dataloader")
 parser.add_argument('--tiny_model', action='store_true', help='tiny model')
 
@@ -60,6 +60,12 @@ if dataset_name == 'NYU-v2':
 if dataset_name == 'RGB-D-D':
     train_dataset = RGBDD_Dataset(root_dir=opt.root_dir, scale=opt.scale, downsample='real', train=True, transform=data_transform)
     test_dataset = RGBDD_Dataset(root_dir=opt.root_dir, scale=opt.scale, downsample='real', train=False, transform=data_transform)
+if dataset_name == 'TOFDSR':
+    train_dataset = TOFDSR_Dataset(root_dir=opt.root_dir, scale=opt.scale, downsample='real', train=True,
+                                  txt_file="./data/TOFDSR_Filled_Train.txt", transform=data_transform)
+    test_dataset = TOFDSR_Dataset(root_dir=opt.root_dir, scale=opt.scale, downsample='real', train=False,
+                                 txt_file="./data/TOFDSR_Filled_Test.txt", transform=data_transform)
+
 
 train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=opt.batchsize, shuffle=True, num_workers=8)
 test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=8)
@@ -84,6 +90,11 @@ for epoch in range(max_epoch):
             'seg'].cuda(), data['ns'].cuda()
 
         out = net((guidance, lr, seg,ns))
+
+        if dataset_name == 'TOFDSR':
+            mask = (gt >= 0.02) & (gt <= 1)
+            gt = gt[mask]
+            out = out[mask]
 
         loss = criterion(out, gt)
         loss.backward()
@@ -110,6 +121,8 @@ for epoch in range(max_epoch):
                 rmse = np.zeros(449)
             if dataset_name == 'RGB-D-D':
                 rmse = np.zeros(405)
+            if dataset_name == 'TOFDSR':
+                rmse = np.zeros(560)
             t = tqdm(iter(test_dataloader), leave=True, total=len(test_dataloader))
 
             for idx, data in enumerate(t):
@@ -127,6 +140,13 @@ for epoch in range(max_epoch):
                     out = net((guidance, lr, seg, ns))
                     minmax = [max, min]
                     rmse[idx] = rgbdd_calc_rmse(gt[0, 0], out[0, 0], minmax)
+                if dataset_name == 'TOFDSR':
+                    guidance, lr, gt, seg, ns, max, min = data['guidance'].cuda(), data['lr'].cuda(), data['gt'].cuda(), \
+                    data['seg'].cuda(), data['ns'].cuda(), data[
+                        'max'].cuda(), data['min'].cuda()
+                    out = net((guidance, lr, seg, ns))
+                    minmax = [max, min]
+                    rmse[idx] = tofdsr_calc_rmse(gt[0, 0], out[0, 0], minmax)
 
                     t.set_description('[validate] rmse: %f' % rmse[:idx + 1].mean())
                     t.refresh()
@@ -148,8 +168,10 @@ for epoch in range(max_epoch):
             net.eval()
             if dataset_name == 'NYU-v2_Our':
                 rmse = np.zeros(449)
-            if dataset_name == 'RGB-D-D':
+            elif dataset_name == 'RGB-D-D':
                 rmse = np.zeros(405)
+            else:
+                rmse = np.zeros(560)
             t = tqdm(iter(test_dataloader), leave=True, total=len(test_dataloader))
 
             for idx, data in enumerate(t):
@@ -161,12 +183,19 @@ for epoch in range(max_epoch):
                     minmax = test_minmax[:, idx]
                     minmax = torch.from_numpy(minmax).cuda()
                     rmse[idx] = calc_rmse(gt[0, 0], out[0, 0], minmax)
-                if dataset_name == 'RGB-D-D':
+                elif dataset_name == 'RGB-D-D':
                     guidance, lr, gt, seg, ns, max, min = data['guidance'].cuda(), data['lr'].cuda(), data['gt'].cuda(), data['seg'].cuda(), data['ns'].cuda(), data[
                         'max'].cuda(), data['min'].cuda()
                     out = net((guidance, lr, seg, ns))
                     minmax = [max, min]
                     rmse[idx] = rgbdd_calc_rmse(gt[0, 0], out[0, 0], minmax)
+                else:
+                    guidance, lr, gt, seg, ns, max, min = data['guidance'].cuda(), data['lr'].cuda(), data['gt'].cuda(), \
+                    data['seg'].cuda(), data['ns'].cuda(), data[
+                        'max'].cuda(), data['min'].cuda()
+                    out = net((guidance, lr, seg, ns))
+                    minmax = [max, min]
+                    rmse[idx] = tofdsr_calc_rmse(gt[0, 0], out[0, 0], minmax)
 
                     t.set_description('[validate] rmse: %f' % rmse[:idx + 1].mean())
                     t.refresh()
@@ -182,4 +211,3 @@ for epoch in range(max_epoch):
                 epoch + 1, scheduler.get_last_lr()[0], r_mean, best_rmse, best_epoch + 1))
             logging.info(
                 '---------------------------------------------------------------------------------------------------------------------------')
-
