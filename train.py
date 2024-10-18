@@ -117,7 +117,7 @@ for epoch in range(max_epoch):
         with torch.no_grad():
 
             net.eval()
-            if dataset_name == 'NYU-v2_Our':
+            if dataset_name == 'NYU-v2':
                 rmse = np.zeros(449)
             if dataset_name == 'RGB-D-D':
                 rmse = np.zeros(405)
@@ -126,7 +126,7 @@ for epoch in range(max_epoch):
             t = tqdm(iter(test_dataloader), leave=True, total=len(test_dataloader))
 
             for idx, data in enumerate(t):
-                if dataset_name == 'NYU-v2_Our':
+                if dataset_name == 'NYU-v2':
                     guidance, lr, gt, seg, ns = data['guidance'].cuda(), data['lr'].cuda(), data['gt'].cuda(), data[
                         'seg'].cuda(), data['ns'].cuda()
 
@@ -166,11 +166,11 @@ for epoch in range(max_epoch):
         with torch.no_grad():
 
             net.eval()
-            if dataset_name == 'NYU-v2_Our':
+            if dataset_name == 'NYU-v2':
                 rmse = np.zeros(449)
-            elif dataset_name == 'RGB-D-D':
+            if dataset_name == 'RGB-D-D':
                 rmse = np.zeros(405)
-            else:
+            if dataset_name == 'TOFDSR':
                 rmse = np.zeros(560)
             t = tqdm(iter(test_dataloader), leave=True, total=len(test_dataloader))
 
@@ -183,13 +183,13 @@ for epoch in range(max_epoch):
                     minmax = test_minmax[:, idx]
                     minmax = torch.from_numpy(minmax).cuda()
                     rmse[idx] = calc_rmse(gt[0, 0], out[0, 0], minmax)
-                elif dataset_name == 'RGB-D-D':
+                if dataset_name == 'RGB-D-D':
                     guidance, lr, gt, seg, ns, max, min = data['guidance'].cuda(), data['lr'].cuda(), data['gt'].cuda(), data['seg'].cuda(), data['ns'].cuda(), data[
                         'max'].cuda(), data['min'].cuda()
                     out = net((guidance, lr, seg, ns))
                     minmax = [max, min]
                     rmse[idx] = rgbdd_calc_rmse(gt[0, 0], out[0, 0], minmax)
-                else:
+                if dataset_name == 'TOFDSR':
                     guidance, lr, gt, seg, ns, max, min = data['guidance'].cuda(), data['lr'].cuda(), data['gt'].cuda(), \
                     data['seg'].cuda(), data['ns'].cuda(), data[
                         'max'].cuda(), data['min'].cuda()
