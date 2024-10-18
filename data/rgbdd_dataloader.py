@@ -29,7 +29,7 @@ class RGBDD_Dataset(Dataset):
     """RGB-D-D Dataset."""
 
     def __init__(self, root_dir="/opt/data/private/dataset/RGB-D-D/", scale=4, downsample='real', train=True,
-                 transform=None):
+                 transform=None, isNearest=False, isNoisyLR=False, isNoisyLRRGB=False):
         """
         Args:
             root_dir (string): Directory with all the images.
@@ -38,13 +38,24 @@ class RGBDD_Dataset(Dataset):
             train (bool): train or test
             transform (callable, optional): Optional transform to be applied on a sample.
         """
-        # types = ['models', 'plants', 'portraits']
 
         self.root_dir = root_dir
         self.transform = transform
         self.scale = scale
         self.downsample = downsample
         self.train = train
+        self.isNoisyLR = isNoisyLR
+        self.isNoisyLRRGB = isNoisyLRRGB
+        self.isNearest = isNearest
+
+        if isNoisyLRRGB:
+            RGBName = "RGBDD_RGB_Noisy"
+            SegName = "RGBDD_RGB_Segment_Noisy"
+            NorName = "RGBDD_RGB_Normal_Noisy"
+        else:
+            RGBName = "RGBDD_RGB"
+            SegName = "RGBDD_RGB_Segment"
+            NorName = "RGBDD_RGB_Normal/RGBDD_Test_normal"
 
         if train:
             if self.downsample == 'real':
@@ -94,13 +105,13 @@ class RGBDD_Dataset(Dataset):
                 self.RGBs = []
                 self.Seg = []
                 self.NormalS = []
-                list_dir = os.listdir('%s/%s/%s/' % (root_dir, "Test", "RGBDD_RGB"))
+                list_dir = os.listdir('%s/%s/%s/' % (root_dir, "Test", RGBName))
                 for n in list_dir:
-                    self.RGBs.append('%s/%s/%s/%s' % (root_dir, "Test", "RGBDD_RGB", n))
+                    self.RGBs.append('%s/%s/%s/%s' % (root_dir, "Test", RGBName, n))
                     self.GTs.append('%s/%s/%s/%s_HR_gt.png' % (root_dir, "Test", "RGBDD_GT", n[:-8]))
-                    self.Seg.append('%s/%s/%s/%s_RGB_segment.png' % (root_dir, "Test", "RGBDD_RGB_Segment", n[:-8]))
+                    self.Seg.append('%s/%s/%s/%s_RGB_segment.png' % (root_dir, "Test", SegName, n[:-8]))
                     self.NormalS.append(
-                        '%s/%s/%s/%s_RGB_normal.png' % (root_dir, "Test", "RGBDD_RGB_Normal/RGBDD_Test_normal", n[:-8]))
+                        '%s/%s/%s/%s_RGB_normal.png' % (root_dir, "Test", NorName, n[:-8]))
 
     def __len__(self):
         return len(self.GTs)
@@ -108,6 +119,7 @@ class RGBDD_Dataset(Dataset):
     def __getitem__(self, idx):
         if self.downsample == 'real':
             image = np.array(Image.open(self.RGBs[idx]).convert("RGB")).astype(np.float32)
+            name = self.RGBs[idx][-22:-8]
             gt = np.array(Image.open(self.GTs[idx])).astype(np.float32)
             seg = np.array(Image.open(self.Seg[idx])).astype(np.float32)
             ns = np.array(Image.open(self.NormalS[idx])).astype(np.float32)
@@ -117,19 +129,22 @@ class RGBDD_Dataset(Dataset):
 
         else:
             image = Image.open(self.RGBs[idx]).convert("RGB")
+            name = self.RGBs[idx][-22:-8]
             image = np.array(image).astype(np.float32)
             gt = Image.open(self.GTs[idx])
             seg = np.array(Image.open(self.Seg[idx])).astype(np.float32)
             ns = np.array(Image.open(self.NormalS[idx])).astype(np.float32)
             w, h = gt.size
             s = self.scale
-            lr = np.array(gt.resize((w // s, h // s), Image.BICUBIC)).astype(np.float32)
+            if self.isNearest:
+                lr = np.array(gt.resize((w // s, h // s), Image.NEAREST)).astype(np.float32)
+            else:
+                lr = np.array(gt.resize((w // s, h // s), Image.BICUBIC)).astype(np.float32)
             gt = np.array(gt).astype(np.float32)
 
         # normalization
         max_out = np.max(lr)
         min_out = np.min(lr)
-
         
         image_max = np.max(image)
         image_min = np.min(image)
@@ -151,6 +166,15 @@ class RGBDD_Dataset(Dataset):
             image, lr, gt, seg, ns = get_patch(image, lr, gt, seg, ns, scale=self.scale, patch_size=256)
         else:
             lr = (lr - min_out) / (max_out - min_out)
+
+        if self.isNoisyLR or self.isNoisyLRRGB:
+            lr_minn = np.min(lr)
+            lr_maxx = np.max(lr)
+            np.random.seed(42)
+            gaussian_noise = np.random.normal(0, 0.07, lr.shape)
+            lr = lr + gaussian_noise
+            lr = np.clip(lr, lr_minn, lr_maxx)
+
         if self.transform:
             image = self.transform(image).float()
             seg = self.transform(np.expand_dims(seg, 2)).float()
@@ -158,6 +182,6 @@ class RGBDD_Dataset(Dataset):
             gt = self.transform(np.expand_dims(gt, 2)).float()
             lr = self.transform(np.expand_dims(lr, 2)).float()
 
-        sample = {'guidance': image, 'lr': lr, 'gt': gt, 'seg': seg, 'ns': ns, 'max': max_out, 'min': min_out}
+        sample = {'guidance': image, 'lr': lr, 'gt': gt, 'seg': seg, 'ns': ns, 'max': max_out, 'min': min_out, 'name':name}
 
         return sample
