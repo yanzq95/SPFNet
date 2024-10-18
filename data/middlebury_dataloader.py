@@ -13,16 +13,11 @@ def modcrop(image, modulo):
 
     return image[:h,:w]
 
-class Middlebury_dataset(Dataset):
-    """RGB-D-D Dataset."""
 
-    def __init__(self, root_dir, scale=8, transform=None):
-        """
-        Args:
-            root_dir (string): Directory with all the images.
-            scale (float): dataset scale
-            transform (callable, optional): Optional transform to be applied on a sample.
-        """
+
+class Middlebury_dataset(Dataset):
+
+    def __init__(self, root_dir, scale=8, transform=None, isNearest=False, isNoisyLR=False, isNoisyLRRGB=False):
 
         self.transform = transform
         self.scale = scale
@@ -31,7 +26,15 @@ class Middlebury_dataset(Dataset):
         self.RGBs = []
         self.Seg = []
         self.NormalS = []
-        
+        self.isNoisyLR = isNoisyLR
+        self.isNoisyLRRGB = isNoisyLRRGB
+        self.isNearest = isNearest
+
+        if isNoisyLRRGB:
+            root_dir = root_dir + "_NoisyRGB"
+        else:
+            root_dir = root_dir
+
         list_dir = os.listdir(root_dir)
         for name in list_dir:
             if name.find('output_color') > -1:
@@ -70,8 +73,10 @@ class Middlebury_dataset(Dataset):
         gt_max = 255.0
         gt_min = 0.0
         gt = (gt - gt_min) / (gt_max - gt_min)
-
-        lr = np.array(Image.fromarray(gt).resize((w//s,h//s),Image.BICUBIC)).astype(np.float32)
+        if self.isNearest:
+            lr = np.array(Image.fromarray(gt).resize((w // s, h // s), Image.NEAREST)).astype(np.float32)
+        else:
+            lr = np.array(Image.fromarray(gt).resize((w//s,h//s),Image.BICUBIC)).astype(np.float32)
 
         image_max = np.max(image)
         image_min = np.min(image)
@@ -84,8 +89,14 @@ class Middlebury_dataset(Dataset):
         ns_max = np.max(ns)
         ns_min = np.min(ns)
         ns = (ns - ns_min) / (ns_max - ns_min)
+        if self.isNoisyLR or self.isNoisyLRRGB:
+            lr_minn = np.min(lr)
+            lr_maxx = np.max(lr)
+            np.random.seed(42)
+            gaussian_noise = np.random.normal(0, 0.07, lr.shape)
+            lr = lr + gaussian_noise
+            lr = np.clip(lr, lr_minn, lr_maxx)
         
-
         if self.transform:
             image = self.transform(image).float()
             seg = self.transform(np.expand_dims(seg, 2)).float()
