@@ -8,7 +8,7 @@ from data.middlebury_dataloader import Middlebury_dataset
 from data.tofdsr_dataloader import *
 import os
 import torch
-
+ 
 parser = argparse.ArgumentParser()
 parser.add_argument('--scale', type=int, default=4, help='scale factor')
 parser.add_argument("--num_feats", type=int, default=42, help="channel number of the middle hidden layer")
