@@ -2,7 +2,7 @@ import torch.nn as nn
 import torch
 
 import torch.nn.functional as F
-
+ 
 def default_conv(in_channels, out_channels, kernel_size, bias=True):
     return nn.Conv2d(
         in_channels, out_channels, kernel_size,
@@ -298,3 +298,4 @@ class APP(nn.Module):
         res = self.c2(res_depth + depth)
 
         return res, self.rgb_up(out_rgb), self.seg_up(out_seg), self.ns_up(out_ns)
+
