@@ -3,7 +3,7 @@ import math
 from model.common import *
 import torch.nn as nn
 
-
+ 
 class SPFNet(nn.Module):
     def __init__(self, num_feats, kernel_size, scale,reduction, tiny_model=False):
         super(SPFNet, self).__init__()
